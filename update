@@ -1,0 +1,148 @@
+<?php  
+	// koneksi database
+	$db = mysqli_connect("localhost","root","admin12345","phpdasar");
+
+	$id = $_GET["id"];
+	
+	// queri data berdasarkan id
+	$mhs = mysqli_query($db,"SELECT * FROM mahasiswa WHERE id = $id");
+
+	// menampilkan data berdasarkan id di value
+	$data = mysqli_fetch_assoc($mhs);
+
+	// cek apakah tombol submit sudah di tekan
+	if (isset($_POST["submit"]) ){
+
+		// ambil data dari tiap elemen form
+		$id = $_POST["id"];
+		$nama = htmlspecialchars ($_POST["nama"]);
+		$nim = htmlspecialchars ($_POST["nim"]);
+		$email = htmlspecialchars ($_POST["email"]);
+		$jurusan = htmlspecialchars ($_POST["jurusan"]);
+		$gambar = $_FILES['gambar']['name'];
+
+		// update gambar
+		if ($gambar !== "") {
+
+		 $ukuranFile = $_FILES['gambar']['size'];
+		 $error = $_FILES['gambar']['error'];
+		 $tmpName = $_FILES['gambar']['tmp_name'];
+		 
+		// cek apakah data yang upload adalah gambar
+		 $ekstensiGambarValid = ['jpg','jpeg','png'];
+		 $ekstensiGambar = explode('.', $gambar);
+		 $ekstensi = strtolower( end($ekstensiGambar));
+		 if (!in_array ($ekstensi, $ekstensiGambarValid)) {
+		 	echo "
+		 			<script> 
+						alert('Yang anda upload bukan gambar');
+						document.location.href='index2.php';
+					</script>
+				";
+				die;
+		 }
+		 // cek apakah gambar terlalu besar
+		 if ($ukuranFile > 1000000) {
+		 	echo "
+		 			<script> 
+						alert('Gambar yang anda upload terlalu besar');
+						document.location.href='index2.php';
+					</script>
+				";
+				die;
+		 }
+		 // generate gambar baru menggunakan angka random
+		 	$namaFileBaru = uniqid();
+		 	$namaFileBaru .= ".";
+		 	$namaFileBaru .= "$ekstensi";
+		 // var_dump($namaFileBaru); die;
+		 // lolos pengecekan gambar siap di upload
+			move_uploaded_file($tmpName,'img/'. $namaFileBaru);
+			$queri = "UPDATE mahasiswa SET
+					nama = '$nama',
+					nim = '$nim',
+					email = '$email',
+					jurusan = '$jurusan',
+					gambar = '$gambar' WHERE id=$id";
+			$sql = mysqli_query($db,$queri);
+		}
+		//query insert data
+		$ubah = "UPDATE mahasiswa SET 
+					nama = '$nama',
+					nim = '$nim',
+					email = '$email',
+					jurusan = '$jurusan',
+					gambar = '$gambar' WHERE id=$id
+				"; 
+
+		$data = mysqli_query($db, $ubah);
+
+		// cek apakah data berhasil diubah
+		if ($ubah == true) {
+			echo "
+				<script> 
+					alert('data berhasil di ubah');
+					document.location.href='index2.php';
+				</script>
+			";
+		} else {
+			echo "<script> 
+					alert('data gagal di ubah');
+					document.location.href='latihan1.php';
+				</script>
+			";
+		}
+
+	}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Crud</title>
+	<style>
+		img {
+			width: 70px;
+			height: 104px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Ubah Data Mahasiswa</h1>
+
+	<form action="" method="post" enctype="multipart/form-data">
+		<ul>
+				<input type="hidden" name="id" required value="<?php echo $data["id"]; ?>">
+
+			<li>
+				<label for="nama">Nama :</label>
+				<input id="nama" type="text" name="nama" required value="<?php echo $data["nama"]; ?>">
+			</li>
+			<li>
+				<label for="nim">Nim :</label>
+				<input id="nim" type="text" name="nim" required value="<?php echo $data["nim"]; ?>">
+			</li>
+			<li>
+				<label for="email">Email :</label>
+				<input id="email" type="text" name="email" required value="<?php echo $data["email"]; ?>">
+			</li>
+			<li>
+				<label for="jurusan">Jurusan :</label>
+				<input id="jurusan" type="text" name="jurusan" required value="<?php echo $data["jurusan"]; ?>">
+			</li>
+			<li>
+				<label for="gambar">Gambar :</label>
+				<br>
+				<img src="img/<?php echo $data["gambar"];?>">
+				<input id="gambar" type="file" name="gambar" required >
+			</li>
+			<li>
+				<button type="submit" name="submit">Ubah data!</button>
+			</li>
+
+		</ul> 
+		
+	</form>
+
+</body >
+</html>
