@@ -9,6 +9,7 @@
 
 	// menampilkan data berdasarkan id di value
 	$data = mysqli_fetch_assoc($mhs);
+	$gambar_lama=$data['gambar'];
 
 	// cek apakah tombol submit sudah di tekan
 	if (isset($_POST["submit"]) ){
@@ -65,20 +66,18 @@
 					jurusan = '$jurusan',
 					gambar = '$gambar' WHERE id=$id";
 			$sql = mysqli_query($db,$queri);
-		}
-		//query insert data
-		$ubah = "UPDATE mahasiswa SET 
+		}else{
+			$queri = "UPDATE mahasiswa SET
 					nama = '$nama',
 					nim = '$nim',
 					email = '$email',
 					jurusan = '$jurusan',
-					gambar = '$gambar' WHERE id=$id
-				"; 
-
-		$data = mysqli_query($db, $ubah);
-
+					gambar = '$gambar_lama' WHERE id=$id";
+			$sql = mysqli_query($db,$queri);
+		}
+		
 		// cek apakah data berhasil diubah
-		if ($ubah == true) {
+		if ($sql) {
 			echo "
 				<script> 
 					alert('data berhasil di ubah');
